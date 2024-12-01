@@ -10,7 +10,7 @@ And who is the reader supposed to be in these things, anyway? Do we work for San
 
 ## Solutions:
 
-Example: The Great Christmas Analytics Crisis of 2024 (intermediate)
+### Example: The Great Christmas Analytics Crisis of 2024 (intermediate)
 
 ```sql
   select city, country, avg(naughty_nice_score) as avg_score, count(*) as children_count from children
@@ -73,3 +73,99 @@ Example: The Great Christmas Analytics Crisis of 2024 (intermediate)
  Birmingham | UK          | 88.0000000000000000
  
 (6 rows)
+
+### Day 1: Santa's Gift List Parser (beginner)
+
+#### Database Structure:
+
+```sql
+  CREATE TABLE children (
+      child_id INT PRIMARY KEY,
+      name VARCHAR(100),
+      age INT
+  );
+  CREATE TABLE wish_lists (
+      list_id INT PRIMARY KEY,
+      child_id INT,
+      wishes JSON,
+      submitted_date DATE
+  );
+  CREATE TABLE toy_catalogue (
+      toy_id INT PRIMARY KEY,
+      toy_name VARCHAR(100),
+      category VARCHAR(50),
+      difficulty_to_make INT
+  );
+```
+
+return top 5 for: name,primary_wish,backup_wish,favorite_color,color_count,gift_complexity,workshop_assignment
+ (no spaces)
+
+```sql
+\pset format unaligned
+   \pset fieldsep ','
+
+with gift_list as (
+  select name,
+    wishes ->> 'first_choice' as primary_wish,
+    wishes ->> 'second_choice' as backup_wish,
+    wishes ->> 'colors' as favourite_colours,
+    pg_typeof(wishes ->> 'colors')
+  from children c
+  left join wish_lists w on c.child_id = w.child_id
+), l2 as (
+  -- select pg_typeof(favourite_colours) from gift_list
+  select name,
+    primary_wish,
+    backup_wish,
+    string_to_array(favourite_colours, '","') as colour_array,
+    case when difficulty_to_make = 1 then 'Simple Gift'
+      when difficulty_to_make = 2 then 'Moderate Gift'
+      else 'Complex Gift' end
+      as gift_complexity,
+    case when category like 'outdoor' then 'Outside Workshop'
+      when category like 'educational' then 'Learning Workshop'
+      else 'General Workshop' end
+      as workshop_assignment
+  from gift_list
+  left join toy_catalogue on primary_wish = toy_name
+  order by name asc
+  limit 5
+)
+select name,
+  primary_wish,
+  backup_wish,
+  case when colour_array[1] like '%Blue%' then 'Blue'
+    when colour_array[1] like '%Purple%' then 'Purple'
+    when colour_array[1] like '%Pink%' then 'Pink'
+    when colour_array[1] like '%Yellow%' then 'Yellow'
+    when colour_array[1] like '%White%' then 'White'
+    when colour_array[1] like '%Red%' then 'Red'
+    when colour_array[1] like '%Brown%' then 'Brown'
+    when colour_array[1] like '%Green%' then 'Green'
+    when colour_array[1] like '%Black%' then 'Black'
+    when colour_array[1] like '%Orange%' then 'Orange'
+    else colour_array[1] end as favorite_color,
+  array_length(colour_array, 1) as color_count,
+  gift_complexity,
+  workshop_assignment
+from l2;
+```
+
+(early version of table)
+|   name    |   primary_wish   |   backup_wish   | gift_complexity | workshop_assignment |
+-----------|------------------|-----------------|-----------------|---------------------
+ Anastasia | Toy kitchen sets | Barbie dolls    |               4 | General Workshop
+ Giuseppe  | LEGO blocks      | Building sets   |               3 | Learning Workshop
+ Wendy     | LEGO blocks      | Toy trains      |               3 | Learning Workshop
+ Winnifred | Building sets    | Rubiks cubes    |               4 | Learning Workshop
+ Kayla     | Toy trucks       | Stuffed animals |               2 | General Workshop
+ 
+(5 rows)
+
+name,primary_wish,backup_wish,gift_complexity,workshop_assignment\
+Abagail,Building sets,LEGO blocks,Blue,1,Complex Gift,Learning Workshop
+Abbey,Stuffed animals,Teddy bears,White,4,Complex Gift,General Workshop
+Abbey,Toy trains,Toy trains,Pink,2,Complex Gift,General Workshop
+Abbey,Barbie dolls,Play-Doh,Purple,1,Moderate Gift,General Workshop
+Abbey,Yo-yos,Building blocks,Blue,5,Simple Gift,General Workshop
