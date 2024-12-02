@@ -101,6 +101,8 @@ And who is the reader supposed to be in these things, anyway? Do we work for San
 return top 5 for: name,primary_wish,backup_wish,favorite_color,color_count,gift_complexity,workshop_assignment
  (no spaces)
 
+#### Solution:
+
 ```sql
 \pset format unaligned
    \pset fieldsep ','
@@ -169,3 +171,81 @@ Abbey,Stuffed animals,Teddy bears,White,4,Complex Gift,General Workshop
 Abbey,Toy trains,Toy trains,Pink,2,Complex Gift,General Workshop
 Abbey,Barbie dolls,Play-Doh,Purple,1,Moderate Gift,General Workshop
 Abbey,Yo-yos,Building blocks,Blue,5,Simple Gift,General Workshop
+
+### Day 2: Santa's Jumbled Letters (beginner)
+
+#### Database Structure:
+
+```sql
+-- Binky's Table
+CREATE TABLE letters_a (
+    id SERIAL PRIMARY KEY,
+    value INTEGER
+);
+
+-- Blinky's Table
+CREATE TABLE letters_b (
+    id SERIAL PRIMARY KEY,
+    value INTEGER
+);
+```
+
+#### (Part of) Example Data:
+
+```sql
+-- Binky's data (letters_a)
+INSERT INTO letters_a (id, value) VALUES
+(1, 68),    -- D
+(2, 101),   -- e
+(4, 97),    -- a
+(5, 114),   -- r
+(6, 32),    -- (space)
+(7, 83),    -- S
+(8, 35),    -- # (noise)
+```
+
+```sql
+-- Blinky's data (letters_b)
+INSERT INTO letters_b (id, value) VALUES
+(23, 32),   -- (space)
+(24, 36),   -- $ (noise)
+(25, 108),  -- l
+(26, 105),  -- i
+(27, 107),  -- k
+(28, 101),  -- e
+(29, 32),   -- (space)
+(30, 97),   -- a
+```
+
+#### Solution:
+
+```sql
+with selection as (
+  select value from letters_a
+  union all 
+  select value from letters_b
+),
+content as (
+select chr(value) as c from selection
+  where (value > 96 and value < 123)
+    or (value > 64 and value < 91)
+    or value = 33
+    or value = 39
+    or value = 40
+    or value = 41
+    or value = 44
+    or value = 45
+    or value = 46
+    or value = 58
+    or value = 59
+    or value = 63
+    or value = 32
+)
+select string_agg(c, '') from content;
+```
+
+#### Output:
+
+string_agg
+Dear Santa, I hope this letter finds you well in the North Pole! I want a SQL course for Christmas!
+(1 row)
