@@ -249,3 +249,33 @@ select string_agg(c, '') from content;
 string_agg
 Dear Santa, I hope this letter finds you well in the North Pole! I want a SQL course for Christmas!
 (1 row)
+
+### Day 3: The Greatest Christmas Dinner Ever! (beginner)
+
+#### Database Structure:
+
+```sql
+DROP TABLE IF EXISTS christmas_menus CASCADE;
+
+CREATE TABLE christmas_menus (
+  id SERIAL PRIMARY KEY,
+  menu_data XML
+);
+```
+
+```sql
+with info as (
+  select (xpath('//total_guests/text()', menu_data)::varchar[]::integer[])[1] as guests,
+    (xpath('//total_count/text()', menu_data)::varchar[]::integer[])[1] as guests2,
+    (xpath('//guestCount/text()', menu_data)::varchar[]::integer[])[1] as guests3,
+    --(xpath('//food_item_id/text()', menu_data)::varchar[]::integer[])[1] as food_id
+    (xpath('//food_item_id/text()', menu_data))::text[] as food_ids
+  from christmas_menus
+)
+--select * from info
+--select food_id, count(*) from info
+select unnest(food_ids) as items, count(*) from info
+where guests > 78 or guests2 > 78 or guests3 > 78
+group by items
+order by count desc;
+```
