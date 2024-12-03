@@ -1,5 +1,6 @@
 # Day 3: The Greatest Christmas Dinner Ever! 🍗
-## Skills Used:
+
+## Skills Used: CTE, parsing XML
 
 ----
 
@@ -66,3 +67,28 @@ INSERT INTO christmas_menus (id, menu_data) VALUES
 ----
 
 ## Solution
+
+### Query
+
+```sql
+with info as (
+  select (xpath('//total_guests/text()', menu_data)::varchar[]::integer[])[1] as guests,
+    (xpath('//total_count/text()', menu_data)::varchar[]::integer[])[1] as guests2,
+    (xpath('//guestCount/text()', menu_data)::varchar[]::integer[])[1] as guests3,
+    (xpath('//food_item_id/text()', menu_data))::text[] as food_ids
+  from christmas_menus
+)
+select unnest(food_ids) as item, count(*) from info
+where guests > 78 or guests2 > 78 or guests3 > 78
+group by item
+order by count desc
+limit 1;
+```
+
+### Output
+
+| item | count |
+------|-------
+ 493  |   117
+ 
+(1 row)
