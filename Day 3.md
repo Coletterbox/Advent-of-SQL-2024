@@ -75,7 +75,7 @@ with info as (
   select (xpath('//total_guests/text()', menu_data)::varchar[]::integer[])[1] as guests,
     (xpath('//total_count/text()', menu_data)::varchar[]::integer[])[1] as guests2,
     (xpath('//guestCount/text()', menu_data)::varchar[]::integer[])[1] as guests3,
-    (xpath('//food_item_id/text()', menu_data))::text[] as food_ids
+    (xpath('//food_item_id/text()', menu_data))::varchar[] as food_ids
   from christmas_menus
 )
 select unnest(food_ids) as item, count(*) from info
