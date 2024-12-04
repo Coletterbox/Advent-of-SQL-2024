@@ -28,9 +28,24 @@ n as (
   from toy_production
 ),
 unchanged as (
-  select o.toy_id, old
+  select o.toy_id, old as same
   from o
   inner join n
-  where o.toy_id = n.toy_id and old = new
+  on o.toy_id = n.toy_id and old = new
+),
+old_count as (
+  select toy_id, count(old) as old_tags from o
+  group by toy_id
+),
+new_count as (
+  select toy_id, count(new) as new_tags from n
+  group by toy_id
+),
+unchanged_count as (
+  select toy_id, count(same) as unchanged_tags from unchanged
+  group by toy_id
 )
-select...
+select o.toy_id, old_tags, unchanged_tags, new_tags
+from old_count o
+full join new_count on o.toy_id = new_count.toy_id
+full join unchanged_count on o.toy_id = unchanged_count.toy_id;
