@@ -1,5 +1,7 @@
 # Day 4: The Great Toy Tag Migration of 2024
 
+## Skills Used: array functions, set operations
+
 ### Table Schema
 ```sql
 DROP TABLE IF EXISTS toy_production CASCADE;
