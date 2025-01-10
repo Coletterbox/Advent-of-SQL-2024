@@ -2,9 +2,7 @@ https://wiki.termux.com/wiki/Postgresql
 
 # Advent of SQL 2024
 
-## In which: Santa and his elves are just as helpless as in Advent of Code
-
-And who is the reader supposed to be in these things, anyway? Do we work for Santa? Is it a seasonal job? Would a person with this job list it on their CV?
+## Attempting three coding advert calendars this year while also having coursework, so my aim is to just do a week or so before taking a break for other, time-sensitive work.
 
 ---
 
